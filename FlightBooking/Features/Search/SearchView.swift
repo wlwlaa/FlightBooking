@@ -41,31 +41,31 @@ struct SearchView: View {
                 Button("Search") { vm.submit() }
                     .disabled(vm.fromIATA.count < 3 || vm.toIATA.count < 3)
 
-                Button("Preview (mock)") {
-                    Task { await vm.quickSearchPreview() }
-                }
-                .disabled(vm.fromIATA.count < 3 || vm.toIATA.count < 3)
+//                Button("Preview (mock)") {
+//                    Task { await vm.quickSearchPreview() }
+//                }
+//                .disabled(vm.fromIATA.count < 3 || vm.toIATA.count < 3)
             }
 
-            Section("Preview") {
-                switch vm.state {
-                case .idle:
-                    Text("No data")
-                case .loading:
-                    ProgressView()
-                case .failed(let msg):
-                    Text(msg)
-                case .loaded(let offers):
-                    ForEach(offers) { offer in
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("\(offer.fromIATA) → \(offer.toIATA)")
-                            Text("\(offer.carrier) • \(offer.price.amount) \(offer.price.currency)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            }
+//            Section("Preview") {
+//                switch vm.state {
+//                case .idle:
+//                    Text("No data")
+//                case .loading:
+//                    ProgressView()
+//                case .failed(let msg):
+//                    Text(msg)
+//                case .loaded(let offers):
+//                    ForEach(offers) { offer in
+//                        VStack(alignment: .leading, spacing: 6) {
+//                            Text("\(offer.fromIATA) → \(offer.toIATA)")
+//                            Text("\(offer.carrier) • \(offer.price.amount) \(offer.price.currency)")
+//                                .font(.subheadline)
+//                                .foregroundStyle(.secondary)
+//                        }
+//                    }
+//                }
+//            }
         }
         .navigationTitle("Flights")
     }
