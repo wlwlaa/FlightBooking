@@ -19,8 +19,15 @@ final class AppContainer {
     }
 
     // MARK: - Networking
-    lazy var apiClient: APIClientProtocol = URLSessionAPIClient()
+    lazy var apiClient: any APIClientProtocol = {
+        if config.useMockAPI {
+            return MockAPIClient(cfg: config.mock)
+        } else {
+            return URLSessionAPIClient()
+        }
+    }()
     lazy var flightSearchAPI = FlightSearchAPI(baseURL: config.apiBaseURL, client: apiClient)
+    lazy var offerDetailsAPI = OfferDetailsAPI(baseURL: config.apiBaseURL, client: apiClient)
 
     // MARK: - Repos
     lazy var flightSearchRepository: FlightSearchRepository = DefaultFlightSearchRepository(api: flightSearchAPI)
@@ -52,7 +59,7 @@ final class AppContainer {
     }
     
     // MARK: - Offer Details
-    lazy var offerDetailsRepository: OfferDetailsRepository = DefaultOfferDetailsRepository()
+    lazy var offerDetailsRepository: OfferDetailsRepository = DefaultOfferDetailsRepository(api: offerDetailsAPI)
     lazy var getOfferDetailsUseCase = GetOfferDetailsUseCase(repo: offerDetailsRepository)
 
     func makeOfferDetailsViewModel(offer: FlightOffer, router: AppRouter) -> OfferDetailsViewModel {
@@ -77,7 +84,15 @@ final class AppContainer {
 
 
     static func live() -> AppContainer {
-        let config = AppConfig(apiBaseURL: URL(string: "https://example.com")!)
+        let env = ProcessInfo.processInfo.environment
+        let useMock = (env["USE_MOCK_API"] == "1") || (env["USE_MOCK_API"] == "true")
+
+        let config = AppConfig(
+            apiBaseURL: URL(string: "https://mock.local")!, // для мока неважно
+            useMockAPI: useMock,
+            mock: MockAPIConfig()
+        )
+
         let stack = SwiftDataStack.makeDefault()
         return AppContainer(config: config, dataStack: stack)
     }
@@ -85,4 +100,6 @@ final class AppContainer {
 
 struct AppConfig {
     let apiBaseURL: URL
+    let useMockAPI: Bool
+    let mock: MockAPIConfig
 }

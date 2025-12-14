@@ -1,3 +1,11 @@
+//
+//  APIError.swift
+//  FlightBooking
+//
+//  Created by Андрей Гацко on 15.12.2025.
+//
+
+
 import Foundation
 
 enum APIError: LocalizedError {

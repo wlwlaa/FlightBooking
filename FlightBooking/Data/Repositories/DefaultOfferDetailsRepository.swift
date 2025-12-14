@@ -5,23 +5,22 @@
 //  Created by Андрей Гацко on 14.12.2025.
 //
 
-
 import Foundation
 
 final class DefaultOfferDetailsRepository: OfferDetailsRepository {
-    func getDetails(for offer: FlightOffer) async throws -> OfferDetails {
-        try await Task.sleep(nanoseconds: 200)
+    private let api: OfferDetailsAPI
 
+    init(api: OfferDetailsAPI) { self.api = api }
+
+    func getDetails(for offer: FlightOffer) async throws -> OfferDetails {
+        let dto = try await api.getDetails(offerId: offer.id)
         return OfferDetails(
             offer: offer,
-            fareName: "Standard",
-            baggage: ["Personal item", "Cabin bag (8kg)"],
-            rules: [
-                "Changes allowed with fee",
-                "Refund depends on fare conditions"
-            ],
-            refundable: false,
-            changeFee: Money(amount: 35, currency: offer.price.currency)
+            fareName: dto.fareName,
+            baggage: dto.baggage,
+            rules: dto.rules,
+            refundable: dto.refundable,
+            changeFee: dto.changeFee?.toDomain()
         )
     }
 }
