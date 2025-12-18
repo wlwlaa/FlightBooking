@@ -59,8 +59,10 @@ The app auto-attaches identity for booking/payments via:
 - iOS Simulator
 - Backend services running on ports **8081–8084**
 
+*Note: you can find backend project [here](https://github.com/wlwlaa/FlightBackend)*
+
 ### 2) Run backend
-Start your backend services so these endpoints are reachable:
+Start your [backend services](https://github.com/wlwlaa/FlightBackend) so these endpoints are reachable:
 - `POST /v1/auth/guest` (8081)
 - `GET /v1/locations/autocomplete` (8082)
 - `POST /v1/flights/search`, `GET /v1/flights/search` (8083)
@@ -122,7 +124,7 @@ App/
   DI/ (AppContainer)
   Navigation/ (Router)
 Core/
-  Networking/ (APIClient, IdentityAware client, errors, coders)
+  Network/ (APIClient, IdentityAware client, errors, coders)
   Identity/ (Guest auth, device id)
 Domain/
   Models/
@@ -159,6 +161,6 @@ Write endpoints send Idempotency-Key automatically to avoid duplicate operations
 
 ## License
 
-MIT licence.
+[MIT licence.](https://github.com/wlwlaa/FlightBooking/blob/main/LICENSE)
 
 
