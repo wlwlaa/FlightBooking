@@ -14,10 +14,47 @@ struct SearchView: View {
     var body: some View {
         Form {
             Section("Route") {
-                TextField("From (IATA)", text: $vm.fromIATA)
+                TextField("From (IATA / city)", text: $vm.fromIATA)
                     .textInputAutocapitalization(.characters)
-                TextField("To (IATA)", text: $vm.toIATA)
+                    .onChange(of: vm.fromIATA) { vm.onFromChanged($0) }
+
+                if vm.isLoadingFrom { ProgressView().scaleEffect(0.8) }
+
+                if !vm.fromSuggestions.isEmpty {
+                    ForEach(vm.fromSuggestions) { s in
+                        Button {
+                            vm.selectFrom(s)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(s.iata) • \(s.name)")
+                                Text("\((s.city ?? s.country))")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+
+                TextField("To (IATA / city)", text: $vm.toIATA)
                     .textInputAutocapitalization(.characters)
+                    .onChange(of: vm.toIATA) { vm.onToChanged($0) }
+
+                if vm.isLoadingTo { ProgressView().scaleEffect(0.8) }
+
+                if !vm.toSuggestions.isEmpty {
+                    ForEach(vm.toSuggestions) { s in
+                        Button {
+                            vm.selectTo(s)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(s.iata) • \(s.name)")
+                                Text("\((s.city ?? s.country))")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
             }
 
             Section("Dates") {
@@ -40,32 +77,7 @@ struct SearchView: View {
             Section {
                 Button("Search") { vm.submit() }
                     .disabled(vm.fromIATA.count < 3 || vm.toIATA.count < 3)
-
-//                Button("Preview (mock)") {
-//                    Task { await vm.quickSearchPreview() }
-//                }
-//                .disabled(vm.fromIATA.count < 3 || vm.toIATA.count < 3)
             }
-
-//            Section("Preview") {
-//                switch vm.state {
-//                case .idle:
-//                    Text("No data")
-//                case .loading:
-//                    ProgressView()
-//                case .failed(let msg):
-//                    Text(msg)
-//                case .loaded(let offers):
-//                    ForEach(offers) { offer in
-//                        VStack(alignment: .leading, spacing: 6) {
-//                            Text("\(offer.fromIATA) → \(offer.toIATA)")
-//                            Text("\(offer.carrier) • \(offer.price.amount) \(offer.price.currency)")
-//                                .font(.subheadline)
-//                                .foregroundStyle(.secondary)
-//                        }
-//                    }
-//                }
-//            }
         }
         .navigationTitle("Flights")
     }

@@ -73,6 +73,7 @@ final class AppContainer {
     lazy var offerCacheRepository: OfferCacheRepository = SwiftDataOfferCacheRepository(stack: dataStack)
     lazy var offerDetailsRepository: OfferDetailsRepository = DefaultOfferDetailsRepository(api: offerDetailsAPI)
     lazy var paymentRepository: PaymentRepository = RemotePaymentRepository(api: paymentsAPI)
+    lazy var locationsRepository: LocationsRepository = DefaultLocationsRepository(api: locationsAPI)
 
     // MARK: - UseCases
     lazy var searchFlightsUseCase = SearchFlightsUseCase(repo: flightSearchRepository, history: searchHistoryRepository)
@@ -86,12 +87,10 @@ final class AppContainer {
     lazy var createBookingUseCase = CreateBookingUseCase(repo: bookingRepository)
     
     lazy var createPaymentIntentUseCase = CreatePaymentIntentUseCase(repo: paymentRepository)
+    
+    lazy var autocompleteLocationsUseCase = AutocompleteLocationsUseCase(repo: locationsRepository)
 
     // MARK: - VMs
-    func makeSearchViewModel(router: AppRouter) -> SearchViewModel {
-        SearchViewModel(searchFlights: searchFlightsUseCase, router: router)
-    }
-
     func makeResultsViewModel(query: SearchQuery, router: AppRouter) -> ResultsViewModel {
         ResultsViewModel(
             query: query,
@@ -130,6 +129,14 @@ final class AppContainer {
             createBooking: createBookingUseCase,
             createPaymentIntent: createPaymentIntentUseCase,
             confirmBooking: confirmBookingUseCase,
+            router: router
+        )
+    }
+    
+    func makeSearchViewModel(router: AppRouter) -> SearchViewModel {
+        SearchViewModel(
+            searchFlights: searchFlightsUseCase,
+            autocomplete: autocompleteLocationsUseCase,
             router: router
         )
     }
