@@ -3,6 +3,12 @@
 Student iOS app for searching flights and managing bookings, integrated with a Swagger-defined backend (multi-service).  
 UI is built with **SwiftUI**, architecture is **MVVM + UseCases + Repositories**, local persistence via **SwiftData** (cache/history).
 
+## For implementation
+- [ ] Authorization page
+- [ ] Check and repair (if needed) local data store
+- [ ] UI improvement
+
+
 
 ## Features
 
@@ -162,5 +168,3 @@ Write endpoints send Idempotency-Key automatically to avoid duplicate operations
 ## License
 
 [MIT licence.](https://github.com/wlwlaa/FlightBooking/blob/main/LICENSE)
-
-
