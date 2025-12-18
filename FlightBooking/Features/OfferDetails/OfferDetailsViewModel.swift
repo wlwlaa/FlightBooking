@@ -43,7 +43,7 @@ final class OfferDetailsViewModel {
             self.offer = details.offer
             state = .loaded(details)
         } catch {
-            state = .failed(error.localizedDescription)
+            state = .failed(offerUserMessage(error))
         }
     }
 
@@ -70,10 +70,22 @@ final class OfferDetailsViewModel {
 
             router.push(.booking(result.offer))
         } catch {
-            // 404/409: offer expired/unavailable — показываем и не пушим booking
-            errorText = error.localizedDescription
+            errorText = offerUserMessage(error)
         }
 
         isChecking = false
     }
+    
+    private func offerUserMessage(_ error: Error) -> String {
+        if let api = error as? APIError {
+            switch api {
+            case .httpStatus(let code, _) where code == 404 || code == 409:
+                return "Offer expired"
+            default:
+                break
+            }
+        }
+        return error.localizedDescription
+    }
 }
+

@@ -18,7 +18,15 @@ struct OfferDetailsView: View {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .failed(let msg):
-                ContentUnavailableView("Failed to load", systemImage: "xmark.circle", description: Text(msg))
+                if msg == "Offer expired" {
+                    ContentUnavailableView(
+                        "Offer expired",
+                        systemImage: "clock.arrow.circlepath",
+                        description: Text("Please go back and run a new search.")
+                    )
+                } else {
+                    ContentUnavailableView("Failed to load", systemImage: "xmark.circle", description: Text(msg))
+                }
 
             case .loaded(let details):
                 if let t = vm.bannerText {
