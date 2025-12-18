@@ -10,4 +10,5 @@ import Foundation
 
 protocol OfferDetailsRepository {
     func getDetails(for offer: FlightOffer) async throws -> OfferDetails
+    func priceCheck(offerId: String) async throws -> PriceCheckResult
 }

@@ -28,6 +28,19 @@ struct ResultsView: View {
                             onBook: { vm.book(offer) }
                         )
                     }
+                    if vm.nextCursor != nil {
+                        HStack {
+                            Spacer()
+                            if vm.isLoadingMore {
+                                ProgressView()
+                            } else {
+                                Button("Load more") {
+                                    Task { await vm.loadMore() }
+                                }
+                            }
+                            Spacer()
+                        }
+                    }
                 }
                 .refreshable { await vm.refresh() }
             }

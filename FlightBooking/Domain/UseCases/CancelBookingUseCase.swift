@@ -11,7 +11,7 @@ import Foundation
 struct CancelBookingUseCase {
     let repo: BookingRepository
 
-    func execute(id: UUID) async throws {
-        try await repo.updateStatus(id: id, status: .canceled)
+    func execute(id: UUID) async throws -> Booking {
+        try await repo.cancel(id: id)
     }
 }

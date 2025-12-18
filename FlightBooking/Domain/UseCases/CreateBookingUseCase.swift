@@ -11,7 +11,7 @@ import Foundation
 struct CreateBookingUseCase {
     let repo: BookingRepository
 
-    func execute(offer: FlightOffer, passengers: [Passenger]) async throws -> Booking {
-        try await repo.create(offer: offer, passengers: passengers)
+    func execute(offer: FlightOffer, contact: Contact, passengers: [Passenger]) async throws -> Booking {
+        try await repo.createDraft(offerId: offer.id, contact: contact, passengers: passengers)
     }
 }

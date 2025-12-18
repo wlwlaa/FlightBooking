@@ -53,7 +53,8 @@ final class SearchViewModel {
                 adults: max(1, adults),
                 cabin: cabin
             )
-            let offers = try await searchFlights.execute(query)
+            let page = try await searchFlights.execute(query)
+            let offers = page.offers
             state = .loaded(offers)
         } catch {
             state = .failed(error.localizedDescription)

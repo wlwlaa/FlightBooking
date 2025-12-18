@@ -9,5 +9,6 @@
 import Foundation
 
 protocol FlightSearchRepository {
-    func search(_ query: SearchQuery) async throws -> [FlightOffer]
+    func search(_ query: SearchQuery) async throws -> FlightSearchPage
+    func continueSearch(cursor: String, limit: Int?) async throws -> FlightSearchPage
 }

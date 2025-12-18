@@ -38,11 +38,9 @@ struct TripDetailsView: View {
                                 Text(dateOnly(p.birthDate))
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
-                                if let doc = p.documentNumber {
-                                    Text("Doc: \(doc)")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
+                                Text("Doc: \(p.documentNumber)")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
                             }
                             .padding(.vertical, 4)
                         }

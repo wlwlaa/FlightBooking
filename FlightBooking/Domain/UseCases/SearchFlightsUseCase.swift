@@ -12,7 +12,7 @@ struct SearchFlightsUseCase {
     let repo: FlightSearchRepository
     let history: SearchHistoryRepository
 
-    func execute(_ query: SearchQuery) async throws -> [FlightOffer] {
+    func execute(_ query: SearchQuery) async throws -> FlightSearchPage {
         try await history.save(query)
         return try await repo.search(query)
     }

@@ -1,25 +1,29 @@
 //
-//  APIError.swift
+//  APIError 2.swift
 //  FlightBooking
 //
-//  Created by Андрей Гацко on 15.12.2025.
+//  Created by Андрей Гацко on 18.12.2025.
 //
 
 
 import Foundation
 
 enum APIError: LocalizedError {
-    case invalidURL
-    case httpStatus(Int, String?)
+    case httpStatus(Int, ErrorResponse?)
     case decodeFailed(String)
-    case noMockRoute(String)
+    case badServerResponse
 
     var errorDescription: String? {
         switch self {
-        case .invalidURL: return "Invalid URL"
-        case .httpStatus(let code, let msg): return "HTTP \(code)\(msg.map { ": \($0)" } ?? "")"
-        case .decodeFailed(let msg): return "Decode failed: \(msg)"
-        case .noMockRoute(let path): return "No mock route for \(path)"
+        case .httpStatus(let status, let err):
+            if let err {
+                return "HTTP \(status) • \(err.code): \(err.message) • traceId=\(err.traceId)"
+            }
+            return "HTTP \(status)"
+        case .decodeFailed(let msg):
+            return "Decode failed: \(msg)"
+        case .badServerResponse:
+            return "Bad server response"
         }
     }
 }

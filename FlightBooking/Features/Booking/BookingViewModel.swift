@@ -22,16 +22,31 @@ final class BookingViewModel {
     let offer: FlightOffer
 
     var passengers: [PassengerForm] = [PassengerForm()]
+    var email: String = ""
+    var phone: String = ""
     var isSubmitting: Bool = false
     var errorMessage: String?
     var createdBooking: Booking?
+    var isPaying = false
+    var paymentInfoText: String?
 
     private let createBooking: CreateBookingUseCase
     private unowned let router: AppRouter
+    
+    private let createPaymentIntent: CreatePaymentIntentUseCase
+    private let confirmBooking: ConfirmBookingUseCase
 
-    init(offer: FlightOffer, createBooking: CreateBookingUseCase, router: AppRouter) {
+    init(
+        offer: FlightOffer,
+        createBooking: CreateBookingUseCase,
+        createPaymentIntent: CreatePaymentIntentUseCase,
+        confirmBooking: ConfirmBookingUseCase,
+        router: AppRouter
+    ) {
         self.offer = offer
         self.createBooking = createBooking
+        self.createPaymentIntent = createPaymentIntent
+        self.confirmBooking = confirmBooking
         self.router = router
     }
 
@@ -45,8 +60,13 @@ final class BookingViewModel {
     }
 
     var canSubmit: Bool {
-        passengers.allSatisfy { !$0.firstName.trimmingCharacters(in: .whitespaces).isEmpty &&
-                               !$0.lastName.trimmingCharacters(in: .whitespaces).isEmpty }
+        let emailOk = email.contains("@") && email.contains(".")
+        let paxOk = passengers.allSatisfy {
+            !$0.firstName.trimmingCharacters(in: .whitespaces).isEmpty &&
+            !$0.lastName.trimmingCharacters(in: .whitespaces).isEmpty &&
+            !$0.documentNumber.trimmingCharacters(in: .whitespaces).isEmpty
+        }
+        return emailOk && paxOk
     }
 
     func submit() async {
@@ -54,18 +74,22 @@ final class BookingViewModel {
         isSubmitting = true
         errorMessage = nil
 
-        let pax: [Passenger] = passengers.map {
-            Passenger(
-                id: $0.id,
-                firstName: $0.firstName.trimmingCharacters(in: .whitespaces),
-                lastName: $0.lastName.trimmingCharacters(in: .whitespaces),
-                birthDate: $0.birthDate,
-                documentNumber: $0.documentNumber.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0.documentNumber
-            )
-        }
-
         do {
-            let booking = try await createBooking.execute(offer: offer, passengers: pax)
+            let contact = Contact(
+                email: email.trimmingCharacters(in: .whitespaces),
+                phone: phone.trimmingCharacters(in: .whitespaces).isEmpty ? nil : phone.trimmingCharacters(in: .whitespaces)
+            )
+
+            let pax: [Passenger] = passengers.map {
+                Passenger(
+                    firstName: $0.firstName.trimmingCharacters(in: .whitespaces),
+                    lastName: $0.lastName.trimmingCharacters(in: .whitespaces),
+                    birthDate: $0.birthDate,
+                    documentNumber: $0.documentNumber.trimmingCharacters(in: .whitespaces)
+                )
+            }
+
+            let booking = try await createBooking.execute(offer: offer, contact: contact, passengers: pax)
             createdBooking = booking
         } catch {
             errorMessage = error.localizedDescription
@@ -76,5 +100,28 @@ final class BookingViewModel {
 
     func finish() {
         router.goToTripsAndReset()
+    }
+    
+    func payAndConfirm() async {
+        guard let b = createdBooking, b.status == .draft else { return }
+        isPaying = true
+        errorMessage = nil
+        paymentInfoText = nil
+
+        do {
+            let intent = try await createPaymentIntent.execute(
+                bookingId: b.id,
+                amount: nil,
+                currency: nil
+            )
+            paymentInfoText = "\(intent.provider) • \(intent.clientSecret)"
+
+            let confirmed = try await confirmBooking.execute(id: b.id)
+            createdBooking = confirmed
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isPaying = false
     }
 }

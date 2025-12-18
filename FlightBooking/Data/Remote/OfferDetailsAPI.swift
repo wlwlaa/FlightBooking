@@ -17,8 +17,15 @@ final class OfferDetailsAPI {
         self.client = client
     }
 
-    func getDetails(offerId: String) async throws -> OfferDetailsDTO {
-        let req = URLRequest(url: baseURL.appendingPathComponent("/v1/offers/\(offerId)"))
+    func getDetails(offerId: String) async throws -> OfferDetailsResponseDTO {
+        var req = URLRequest(url: baseURL.appendingPathComponent("v1/offers/\(offerId)"))
+        req.httpMethod = "GET"
+        return try await client.send(req)
+    }
+
+    func priceCheck(offerId: String) async throws -> PriceCheckResponseDTO {
+        var req = URLRequest(url: baseURL.appendingPathComponent("v1/offers/\(offerId)/price-check"))
+        req.httpMethod = "POST"
         return try await client.send(req)
     }
 }

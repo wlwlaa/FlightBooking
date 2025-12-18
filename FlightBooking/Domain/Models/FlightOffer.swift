@@ -16,6 +16,7 @@ struct FlightOffer: Identifiable, Codable, Hashable {
     var arriveAt: Date
     var price: Money
     var carrier: String
+    var validUntil: Date 
 }
 
 struct Money: Codable, Hashable {

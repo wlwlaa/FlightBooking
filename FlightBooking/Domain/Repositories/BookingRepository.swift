@@ -9,8 +9,23 @@
 import Foundation
 
 protocol BookingRepository {
-    func list() async throws -> [Booking]
-    func get(id: UUID) async throws -> Booking?
-    func create(offer: FlightOffer, passengers: [Passenger]) async throws -> Booking
-    func updateStatus(id: UUID, status: BookingStatus) async throws
+    func listPage(
+        status: BookingStatus?,
+        from: Date?,
+        to: Date?,
+        cursor: String?,
+        limit: Int?
+    ) async throws -> BookingPage
+
+    func get(id: UUID) async throws -> Booking
+
+    func createDraft(
+        offerId: String,
+        contact: Contact,
+        passengers: [Passenger]
+    ) async throws -> Booking
+    
+    func confirm(id: UUID) async throws -> Booking
+    
+    func cancel(id: UUID) async throws -> Booking
 }

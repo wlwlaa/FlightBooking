@@ -21,6 +21,12 @@ struct OfferDetailsView: View {
                 ContentUnavailableView("Failed to load", systemImage: "xmark.circle", description: Text(msg))
 
             case .loaded(let details):
+                if let t = vm.bannerText {
+                    Section { Text(t).foregroundStyle(.secondary) }
+                }
+                if let e = vm.errorText {
+                    Section { Text(e).foregroundStyle(.red) }
+                }
                 Form {
                     Section("Route") {
                         HStack {
@@ -53,8 +59,21 @@ struct OfferDetailsView: View {
                     }
 
                     Section {
-                        Button("Book") { vm.bookNow() }
-                            .buttonStyle(.borderedProminent)
+                        Button {
+                            Task { await vm.verifyAndBook() }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if vm.isChecking { ProgressView() } else { Text("Book") }
+                                Spacer()
+                            }
+                        }
+                        .disabled(vm.isChecking)
+                        .buttonStyle(.borderedProminent)
+                    }
+                    Section("Validity") {
+                        Text("Valid until: \(format(details.validUntil))")
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -62,4 +81,11 @@ struct OfferDetailsView: View {
         .navigationTitle("Details")
         .task { await vm.load() }
     }
+}
+
+private func format(_ d: Date) -> String {
+    let f = DateFormatter()
+    f.dateStyle = .medium
+    f.timeStyle = .short
+    return f.string(from: d)
 }

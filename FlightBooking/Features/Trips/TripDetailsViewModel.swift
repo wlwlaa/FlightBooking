@@ -32,10 +32,7 @@ final class TripDetailsViewModel {
     func load() async {
         state = .loading
         do {
-            guard let booking = try await repo.get(id: bookingId) else {
-                state = .failed("Booking not found")
-                return
-            }
+            let booking = try await repo.get(id: bookingId)
             state = .loaded(booking)
         } catch {
             state = .failed(error.localizedDescription)
@@ -46,13 +43,14 @@ final class TripDetailsViewModel {
         guard case .loaded(let booking) = state, booking.status != .canceled else { return }
         isCancelling = true
         errorMessage = nil
+
         do {
-            try await cancelBooking.execute(id: bookingId)
-            await load()
-            router.pop() // назад в список, он обновится сам через @Query
+            _ = try await cancelBooking.execute(id: bookingId)
+            router.pop()
         } catch {
             errorMessage = error.localizedDescription
         }
+
         isCancelling = false
     }
 }

@@ -13,8 +13,43 @@ struct BookingView: View {
 
     var body: some View {
         if let booking = vm.createdBooking {
-            BookingConfirmationView(booking: booking, onDone: { vm.finish() })
-                .navigationTitle("Confirmed")
+            if booking.status == .confirmed {
+                BookingConfirmationView(booking: booking, onDone: { vm.finish() })
+                    .navigationTitle("Confirmed")
+            } else {
+                Form {
+                    Section("Draft booking created") {
+                        Text("Booking ID: \(booking.id.uuidString)")
+                        Text("Status: \(booking.status.rawValue)")
+                        Text("Amount: \(booking.offer.price.formatted())")
+                    }
+
+                    if let info = vm.paymentInfoText {
+                        Section("Payment") { Text(info).foregroundStyle(.secondary) }
+                    }
+
+                    if let msg = vm.errorMessage {
+                        Section { Text(msg).foregroundStyle(.red) }
+                    }
+
+                    Section {
+                        Button {
+                            Task { await vm.payAndConfirm() }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if vm.isPaying { ProgressView() } else { Text("Pay & Confirm") }
+                                Spacer()
+                            }
+                        }
+                        .disabled(vm.isPaying)
+                        .buttonStyle(.borderedProminent)
+
+                        Button("Go to My Trips (later)") { vm.finish() }
+                    }
+                }
+                .navigationTitle("Payment")
+            }
         } else {
             Form {
                 Section("Trip") {
@@ -24,6 +59,14 @@ struct BookingView: View {
                         Text(vm.offer.price.formatted()).font(.headline)
                     }
                     Text(vm.offer.carrier).foregroundStyle(.secondary)
+                }
+                
+                Section("Contact") {
+                    TextField("Email", text: $vm.email)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                    TextField("Phone (optional)", text: $vm.phone)
+                        .keyboardType(.phonePad)
                 }
 
                 Section("Passengers") {
@@ -73,7 +116,7 @@ private struct PassengerFormCard: View {
             TextField("First name", text: $p.firstName)
             TextField("Last name", text: $p.lastName)
             DatePicker("Birth date", selection: $p.birthDate, displayedComponents: .date)
-            TextField("Document # (optional)", text: $p.documentNumber)
+            TextField("Document #", text: $p.documentNumber)
         }
         .padding(.vertical, 6)
     }

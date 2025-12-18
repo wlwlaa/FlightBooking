@@ -17,7 +17,7 @@ struct RootView: View {
                     .tabItem { Label("Search", systemImage: "magnifyingglass") }
                     .tag(AppTab.search)
 
-                TripsView()
+                TripsView(router: router, vm: container.makeTripsViewModel())
                     .tabItem { Label("Trips", systemImage: "airplane") }
                     .tag(AppTab.trips)
             }
@@ -32,6 +32,27 @@ struct RootView: View {
                 case .tripDetails(let id):
                     TripDetailsView(vm: container.makeTripDetailsViewModel(bookingId: id, router: router))
                 }
+            }
+            .task {
+                #if DEBUG
+                do {
+                    let r = try await container.locationsAPI.autocomplete(query: "hel")
+                    print("✅ locations: \(r.items.first?.iata ?? "?") \(r.items.first?.name ?? "")")
+                } catch {
+                    print("❌ locations error:", error)
+                }
+                #endif
+            }
+            .task {
+                #if DEBUG
+                await container.identityManager.warmUpGuest()
+                do {
+                    let me = try await container.identityManager.fetchMe()
+                    print("✅ me:", me)
+                } catch {
+                    print("❌ me error:", error)
+                }
+                #endif
             }
         }
     }
